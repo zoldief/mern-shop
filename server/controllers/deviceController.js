@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 const path = require('path');
-const { Device, DeviceInfo } = require('../models/models');
+const { Device, DeviceInfo, Rating } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
 class DeviceController {
@@ -52,7 +52,17 @@ class DeviceController {
 
   async getOne(req, res) {
     const { id } = req.params;
+    const rating = await Rating.findAll({ where: { deviceId: id } });
     const device = await Device.findOne({
+      where: { id },
+      include: [{ model: DeviceInfo, as: 'info' }],
+    });
+    return res.json({ device, rating });
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+    const device = await Device.destroy({
       where: { id },
       include: [{ model: DeviceInfo, as: 'info' }],
     });
